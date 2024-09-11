@@ -1,6 +1,6 @@
 use serde::Serialize;
 use std::fs::File;
-use std::io::Write;
+use std::io::{self, Write};
 use surrealdb::engine::remote::ws::{Client, Ws};
 use surrealdb::opt::auth::{Root, Scope};
 use surrealdb::Response;
@@ -37,6 +37,12 @@ async fn main() -> surrealdb::Result<()> {
     // Create the scope for the user
     create_scope(&db).await?;
 
+    println!("Scope created successfully!");
+
+
+        // Get user input
+    let (email, password) = get_user_credentials().unwrap();
+
     // sign up to get JWT
     let jwt = db
         .signup(Scope {
@@ -44,8 +50,8 @@ async fn main() -> surrealdb::Result<()> {
             database: "test",
             scope: "admin",
             params: Credentials {
-                email: "info@surrealdb.com",
-                pass: "123456",
+                email : &email,
+                pass: &password,
             },
         })
         .await?;
@@ -75,4 +81,19 @@ async fn main() -> surrealdb::Result<()> {
 async fn perform_query(db: &Surreal<Client>, query: &str) -> surrealdb::Result<Response> {
     let response = db.query(query).await?;
     Ok(response)
+}
+
+fn get_user_credentials() -> io::Result<(String, String)> {
+    let mut email = String::new();
+    let mut password = String::new();
+
+    println!("Enter email:");
+    io::stdin().read_line(&mut email)?;
+    let email = email.trim().to_string(); // Remove any extra whitespace/newlines
+
+    println!("Enter password:");
+    io::stdin().read_line(&mut password)?;
+    let password = password.trim().to_string(); // Remove any extra whitespace/newlines
+
+    Ok((email, password))
 }
