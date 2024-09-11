@@ -1,4 +1,6 @@
 use serde::Serialize;
+use std::fs::File;
+use std::io::Write;
 use surrealdb::engine::remote::ws::{Client, Ws};
 use surrealdb::opt::auth::{Root, Scope};
 use surrealdb::Response;
@@ -51,7 +53,14 @@ async fn main() -> surrealdb::Result<()> {
     let token = jwt.as_insecure_token();
     println!("JWT Token: {:?}", token);
 
-    // Perform a query with JWT
+    // Write the token to a file
+    let file = File::create("token.txt");
+    match writeln!(file.expect("file"), "{}", token) {
+        Ok(_) => println!("Token has been written to token.txt"),
+        Err(e) => eprintln!("Failed to write token to file: {}", e),
+    }
+
+    // Perform a query
     let query = r#"
         SELECT * FROM user;
     "#;
@@ -61,7 +70,6 @@ async fn main() -> surrealdb::Result<()> {
 
     Ok(())
 }
-
 
 // Function to perform a query
 async fn perform_query(db: &Surreal<Client>, query: &str) -> surrealdb::Result<Response> {
