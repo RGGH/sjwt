@@ -41,7 +41,7 @@ async fn main() -> surrealdb::Result<()> {
 
 
         // Get user input
-    let (email, password) = get_user_credentials().unwrap();
+    let (email, password) = get_user_credentials().await.unwrap();
 
     // sign up to get JWT
     let jwt = db
@@ -83,7 +83,7 @@ async fn perform_query(db: &Surreal<Client>, query: &str) -> surrealdb::Result<R
     Ok(response)
 }
 
-fn get_user_credentials() -> io::Result<(String, String)> {
+async fn get_user_credentials() -> io::Result<(String, String)> {
     let mut email = String::new();
     let mut password = String::new();
 
